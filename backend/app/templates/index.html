@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en" data-env="qa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alert Intelligence Dashboard</title>
+    <style>
+        :root { --bg: #0a0e14; --card: #151c28; --border: #30363d; --text: #e6edf3; --muted: #8b949e; --accent: #3b82f6; --critical: #ff4757; --high: #ff9f43; --medium: #feca57; --low: #26de81; --ai: #a855f7; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+        .top-bar { position: fixed; top: 0; left: 0; right: 0; height: 60px; background: #121820; border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 1.5rem; z-index: 100; }
+        .top-bar::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--accent); }
+        .logo { font-weight: 600; font-size: 1.2rem; }
+        .env-badge { margin-left: 1rem; padding: 0.3rem 0.6rem; background: rgba(59,130,246,0.2); border: 1px solid var(--accent); border-radius: 4px; font-size: 0.8rem; color: var(--accent); }
+        .container { display: flex; padding-top: 60px; }
+        .sidebar { width: 220px; background: #121820; border-right: 1px solid var(--border); min-height: calc(100vh - 60px); padding: 1rem; position: fixed; top: 60px; }
+        .nav-item { display: block; padding: 0.75rem 1rem; color: var(--muted); text-decoration: none; border-radius: 6px; margin-bottom: 0.25rem; }
+        .nav-item:hover { background: #1a2332; color: var(--text); }
+        .nav-item.active { background: rgba(59,130,246,0.15); color: var(--accent); }
+        .nav-label { font-size: 0.7rem; color: var(--muted); padding: 1rem 1rem 0.5rem; text-transform: uppercase; }
+        .main { margin-left: 220px; padding: 2rem; flex: 1; }
+        h1 { margin-bottom: 2rem; }
+        .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; }
+        .card.critical { border-left: 3px solid var(--critical); }
+        .card.high { border-left: 3px solid var(--high); }
+        .card.medium { border-left: 3px solid var(--medium); }
+        .card.low { border-left: 3px solid var(--low); }
+        .card-label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; }
+        .card-value { font-size: 2rem; font-weight: 700; }
+        .section { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .section h2 { font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .ai-badge { color: var(--ai); }
+        .alert { background: #121820; border: 1px solid var(--border); border-radius: 8px; padding: 1rem; margin-bottom: 0.75rem; display: flex; gap: 1rem; align-items: flex-start; }
+        .alert.critical { border-left: 3px solid var(--critical); }
+        .alert.high { border-left: 3px solid var(--high); }
+        .rank { font-size: 1.25rem; font-weight: 700; color: var(--muted); width: 40px; }
+        .alert-content { flex: 1; }
+        .alert-title { font-weight: 600; margin-bottom: 0.5rem; }
+        .alert-meta { font-size: 0.85rem; color: var(--muted); margin-bottom: 0.5rem; }
+        .ai-insight { background: rgba(168,85,247,0.1); border: 1px solid rgba(168,85,247,0.2); padding: 0.5rem 0.75rem; border-radius: 4px; font-size: 0.9rem; }
+        .ai-insight strong { color: var(--ai); }
+        .btn { padding: 0.5rem 1rem; border-radius: 6px; border: none; cursor: pointer; font-size: 0.85rem; }
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-secondary { background: #1a2332; border: 1px solid var(--border); color: var(--text); }
+        .ai-status { margin-top: auto; padding: 0.75rem; background: rgba(168,85,247,0.1); border: 1px solid rgba(168,85,247,0.2); border-radius: 6px; color: var(--ai); font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem; }
+        .pulse { width: 8px; height: 8px; background: var(--ai); border-radius: 50%; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+        @media (max-width: 1200px) { .cards { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) { .sidebar { display: none; } .main { margin-left: 0; } .cards { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <header class="top-bar">
+        <span class="logo">🔺 Alert Intelligence</span>
+        <span class="env-badge">QA</span>
+    </header>
+    <div class="container">
+        <aside class="sidebar">
+            <a href="/" class="nav-item active">📊 Dashboard</a>
+            <a href="/api/alerts" class="nav-item">⚠️ Alerts</a>
+            <a href="/api/docs" class="nav-item">📈 API Docs</a>
+            <div class="nav-label">Admin</div>
+            <a href="/api/rules" class="nav-item">⚙️ Rules</a>
+            <a href="/api/users" class="nav-item">👥 Users</a>
+            <a href="/health" class="nav-item">💚 Health</a>
+            <div style="flex:1"></div>
+            <div class="ai-status"><span class="pulse"></span> AI Engine Active</div>
+        </aside>
+        <main class="main">
+            <h1>Alert Intelligence Dashboard</h1>
+            <div class="cards">
+                <div class="card critical"><div class="card-label">Critical</div><div class="card-value">3</div></div>
+                <div class="card high"><div class="card-label">High</div><div class="card-value">12</div></div>
+                <div class="card medium"><div class="card-label">Medium</div><div class="card-value">47</div></div>
+                <div class="card low"><div class="card-label">Low</div><div class="card-value">183</div></div>
+            </div>
+            <div class="section">
+                <h2><span class="ai-badge">🎯</span> AI Priority Queue</h2>
+                <div class="alert critical">
+                    <div class="rank">#1</div>
+                    <div class="alert-content">
+                        <div class="alert-title">Database cluster failover - SQL-PROD-03</div>
+                        <div class="alert-meta">Score: 98 • Zabbix • 2 min ago</div>
+                        <div class="ai-insight"><strong>AI:</strong> Primary node unreachable, failover initiated to SQL-PROD-04.</div>
+                    </div>
+                    <button class="btn btn-primary">View</button>
+                </div>
+                <div class="alert critical">
+                    <div class="rank">#2</div>
+                    <div class="alert-content">
+                        <div class="alert-title">Storage array degraded - SAN-01</div>
+                        <div class="alert-meta">Score: 95 • NetApp • 8 min ago</div>
+                        <div class="ai-insight"><strong>AI:</strong> 2 drives failed in RAID group RG-04. Rebuild at 23%.</div>
+                    </div>
+                    <button class="btn btn-primary">View</button>
+                </div>
+                <div class="alert high">
+                    <div class="rank">#3</div>
+                    <div class="alert-content">
+                        <div class="alert-title">Auth latency spike - ADFS-02</div>
+                        <div class="alert-meta">Score: 82 • AppDynamics • 15 min ago</div>
+                        <div class="ai-insight"><strong>AI:</strong> Response time 3x normal (890ms vs 280ms baseline).</div>
+                    </div>
+                    <button class="btn btn-primary">View</button>
+                </div>
+            </div>
+            <div class="section">
+                <h2>🔇 Auto-Suppressed (Last Hour)</h2>
+                <div class="cards">
+                    <div class="card"><div class="card-value">847</div><div class="card-label">CPU Spikes</div></div>
+                    <div class="card"><div class="card-value">156</div><div class="card-label">Network Flaps</div></div>
+                    <div class="card"><div class="card-value">89</div><div class="card-label">Disk Warnings</div></div>
+                    <div class="card"><div class="card-value">43</div><div class="card-label">Backup Msgs</div></div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
