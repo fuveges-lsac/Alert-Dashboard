@@ -28,8 +28,10 @@ Return JSON: {{"priority_score": 0-100, "summary": "brief analysis", "suggested_
 async def score_alert_background(alert_id: str):
     from app.database import async_session_maker
     from app.models.alert import Alert
+    from app.services.email_service import email_service
+    from app.config import settings
     from sqlalchemy import select
-    
+
     async with async_session_maker() as db:
         result = await db.execute(select(Alert).where(Alert.id == alert_id))
         alert = result.scalar_one_or_none()
@@ -38,3 +40,21 @@ async def score_alert_background(alert_id: str):
             alert.ai_priority_score = score_result.get("priority_score")
             alert.ai_summary = score_result.get("summary")
             await db.commit()
+
+            # Send email notification for critical/high severity or high AI score
+            should_notify = (
+                alert.severity in ["critical", "high"] or
+                (alert.ai_priority_score and alert.ai_priority_score >= 75)
+            )
+
+            if should_notify and settings.alert_notify_email_list:
+                email_service.send_alert_notification(
+                    to_emails=settings.alert_notify_email_list,
+                    alert_id=str(alert.id),
+                    severity=alert.severity,
+                    title=alert.title,
+                    message=alert.message or "",
+                    host=alert.host,
+                    ai_summary=alert.ai_summary,
+                    ai_score=alert.ai_priority_score
+                )

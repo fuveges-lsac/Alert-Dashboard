@@ -18,7 +18,22 @@ class Settings(BaseSettings):
     AZURE_AD_REDIRECT_URI: str = "http://localhost:8000/auth/callback"
     CELERY_BROKER_URL: str = "redis://localhost:6379/1"
     CELERY_RESULT_BACKEND: str = "redis://localhost:6379/2"
-    
+
+    # SMTP Email Settings
+    SMTP_SERVER: str = "mail.smtp2go.com"
+    SMTP_PORT: int = 587
+    SMTP_USERNAME: Optional[str] = None
+    SMTP_PASSWORD: Optional[str] = None
+    SMTP_FROM_EMAIL: str = "LSAC_Site_Checks@outlook.com"
+    ALERT_NOTIFY_EMAILS: str = ""  # Comma-separated list of recipients
+
+    @property
+    def alert_notify_email_list(self) -> List[str]:
+        """Parse comma-separated email list."""
+        if not self.ALERT_NOTIFY_EMAILS:
+            return []
+        return [e.strip() for e in self.ALERT_NOTIFY_EMAILS.split(",") if e.strip()]
+
     class Config:
         env_file = ".env"
 
