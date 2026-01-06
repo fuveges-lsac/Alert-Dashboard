@@ -9,12 +9,21 @@ services:
       - REDIS_URL=redis://redis:6379/0
       - CELERY_BROKER_URL=redis://redis:6379/1
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - AZURE_AD_TENANT_ID=${AZURE_AD_TENANT_ID}
+      - AZURE_AD_CLIENT_ID=${AZURE_AD_CLIENT_ID}
+      - AZURE_AD_CLIENT_SECRET=${AZURE_AD_CLIENT_SECRET}
       - SMTP_SERVER=${SMTP_SERVER}
       - SMTP_PORT=${SMTP_PORT}
       - SMTP_USERNAME=${SMTP_USERNAME}
       - SMTP_PASSWORD=${SMTP_PASSWORD}
       - SMTP_FROM_EMAIL=${SMTP_FROM_EMAIL}
       - ALERT_NOTIFY_EMAILS=${ALERT_NOTIFY_EMAILS}
+      - IMAP_SERVER=${IMAP_SERVER}
+      - IMAP_PORT=${IMAP_PORT}
+      - IMAP_USERNAME=${IMAP_USERNAME}
+      - IMAP_PASSWORD=${IMAP_PASSWORD}
+      - IMAP_FOLDER=${IMAP_FOLDER}
+      - EMAIL_POLL_INTERVAL=${EMAIL_POLL_INTERVAL}
     depends_on:
       - db
       - redis
@@ -23,18 +32,27 @@ services:
 
   celery:
     build: ./backend
-    command: celery -A app.celery_app worker --loglevel=info
+    command: celery -A app.celery_app worker --loglevel=info -B
     environment:
       - DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/alert_intelligence
       - REDIS_URL=redis://redis:6379/0
       - CELERY_BROKER_URL=redis://redis:6379/1
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - AZURE_AD_TENANT_ID=${AZURE_AD_TENANT_ID}
+      - AZURE_AD_CLIENT_ID=${AZURE_AD_CLIENT_ID}
+      - AZURE_AD_CLIENT_SECRET=${AZURE_AD_CLIENT_SECRET}
       - SMTP_SERVER=${SMTP_SERVER}
       - SMTP_PORT=${SMTP_PORT}
       - SMTP_USERNAME=${SMTP_USERNAME}
       - SMTP_PASSWORD=${SMTP_PASSWORD}
       - SMTP_FROM_EMAIL=${SMTP_FROM_EMAIL}
       - ALERT_NOTIFY_EMAILS=${ALERT_NOTIFY_EMAILS}
+      - IMAP_SERVER=${IMAP_SERVER}
+      - IMAP_PORT=${IMAP_PORT}
+      - IMAP_USERNAME=${IMAP_USERNAME}
+      - IMAP_PASSWORD=${IMAP_PASSWORD}
+      - IMAP_FOLDER=${IMAP_FOLDER}
+      - EMAIL_POLL_INTERVAL=${EMAIL_POLL_INTERVAL}
     depends_on:
       - db
       - redis

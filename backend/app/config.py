@@ -19,13 +19,21 @@ class Settings(BaseSettings):
     CELERY_BROKER_URL: str = "redis://localhost:6379/1"
     CELERY_RESULT_BACKEND: str = "redis://localhost:6379/2"
 
-    # SMTP Email Settings
+    # SMTP Email Settings (Sending)
     SMTP_SERVER: str = "mail.smtp2go.com"
     SMTP_PORT: int = 587
     SMTP_USERNAME: Optional[str] = None
     SMTP_PASSWORD: Optional[str] = None
     SMTP_FROM_EMAIL: str = "LSAC_Site_Checks@outlook.com"
     ALERT_NOTIFY_EMAILS: str = ""  # Comma-separated list of recipients
+
+    # IMAP Email Settings (Reading)
+    IMAP_SERVER: str = "outlook.office365.com"
+    IMAP_PORT: int = 993
+    IMAP_USERNAME: Optional[str] = None
+    IMAP_PASSWORD: Optional[str] = None
+    IMAP_FOLDER: str = "INBOX"
+    EMAIL_POLL_INTERVAL: int = 60  # seconds
 
     @property
     def alert_notify_email_list(self) -> List[str]:
